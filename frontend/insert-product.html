@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Insert Product</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #555;
+            font-weight: 500;
+        }
+        
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .nav-link {
+            display: block;
+            text-align: center;
+            margin-top: 1rem;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .nav-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Insert Product</h1>
+        <form id="productForm">
+            <div class="form-group">
+                <label for="productName">Product Name</label>
+                <input type="text" id="productName" name="name" required placeholder="Enter product name">
+            </div>
+            <div class="form-group">
+                <label for="productPrice">Price ($)</label>
+                <input type="number" id="productPrice" name="price" step="0.01" min="0" required placeholder="0.00">
+            </div>
+            <button type="submit" class="btn">Add Product</button>
+        </form>
+        <div id="message"></div>
+        <a href="search-product.html" class="nav-link">Search Products →</a>
+    </div>
+
+    <script>
+        // Send product to backend API
+        async function saveProduct(name, price) {
+            try {
+                const response = await fetch('http://localhost:5000/api/products', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ name, price })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to save product');
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('Error saving product:', error);
+                throw error;
+            }
+        }
+
+        document.getElementById('productForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('productName').value.trim();
+            const price = document.getElementById('productPrice').value;
+            const messageDiv = document.getElementById('message');
+            
+            // Validation
+            if (!name) {
+                showMessage('Please enter a product name', 'error');
+                return;
+            }
+            
+            if (!price || parseFloat(price) <= 0) {
+                showMessage('Please enter a valid price', 'error');
+                return;
+            }
+            
+            try {
+                // Show loading state
+                showMessage('Adding product...', 'success');
+                
+                const result = await saveProduct(name, parseFloat(price));
+                showMessage(`Product "${result.product.name}" added successfully!`, 'success');
+                document.getElementById('productForm').reset();
+            } catch (error) {
+                showMessage(error.message || 'Error adding product. Please try again.', 'error');
+            }
+        });
+        
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            
+            // Clear message after 3 seconds
+            setTimeout(() => {
+                messageDiv.textContent = '';
+                messageDiv.className = '';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
