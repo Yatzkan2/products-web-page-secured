@@ -8,6 +8,7 @@ Simple product management with frontend and Node.js backend.
 
    ```bash
    cd backend
+   npm install
    node index.js
    ```
 2. **Open frontend:**
