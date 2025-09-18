@@ -7,9 +7,9 @@ Simple product management with frontend and Node.js backend.
 1. **Start the backend:**
 
    ```bash
-   cd backend
+   cd products-web-page-secured/backend
    npm install
-   node index.js
+   npm start
    ```
 2. **Open frontend:**
 
